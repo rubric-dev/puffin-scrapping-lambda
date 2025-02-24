@@ -1,0 +1,30 @@
+service: puffin
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ap-northeast-2
+  environment:
+    DB_HOST: ${ssm:/myapp/db-host}
+    DB_PORT: "5432"
+    DB_USER: ${ssm:/myapp/db-user}
+    DB_PASSWORD: ${ssm:/myapp/db-password}
+    DB_NAME: ${ssm:/myapp/db-name}
+    APIFY_TOKEN: ${ssm:/myapp/apify-token}
+  vpc:
+    securityGroupIds:
+      - sg-0123456789abcdef  # ✅ RDS에 접근 가능한 SG ID
+    subnetIds:
+      - subnet-abc12345
+      - subnet-def67890
+
+functions:
+  call-actor:
+    handler: dist/functions/callActor.main
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - ScrapingQueue
+              - Arn
+          batchSize: 10
