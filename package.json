@@ -9,6 +9,7 @@
     "@types/pg": "^8.11.11",
     "install": "^0.13.0",
     "npm": "^11.1.0",
+    "serverless-dotenv-plugin": "^6.0.0",
     "typescript": "^5.7.3"
   }
 }

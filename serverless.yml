@@ -1,16 +1,16 @@
 service: puffin
+  
 
 provider:
   name: aws
   runtime: nodejs18.x
   region: ap-northeast-2
   environment:
-    DB_HOST: ${ssm:/myapp/db-host}
-    DB_PORT: "5432"
-    DB_USER: ${ssm:/myapp/db-user}
-    DB_PASSWORD: ${ssm:/myapp/db-password}
-    DB_NAME: ${ssm:/myapp/db-name}
-    APIFY_TOKEN: ${ssm:/myapp/apify-token}
+    DB_HOST: ${env:DB_HOST, ssm:/myapp/db-host}
+    DB_USER: ${env:DB_USER, ssm:/myapp/db-user}
+    DB_PASSWORD: ${env:DB_PASSWORD, ssm:/myapp/db-password}
+    DB_NAME: ${env:DB_NAME, ssm:/myapp/db-name}
+    APIFY_TOKEN: ${env:APIFY_TOKEN, ssm:/myapp/apify-token}
   vpc:
     securityGroupIds:
       - sg-0123456789abcdef  # ✅ RDS에 접근 가능한 SG ID
@@ -28,3 +28,6 @@ functions:
               - ScrapingQueue
               - Arn
           batchSize: 10
+
+plugins:
+  - serverless-dotenv-plugin
