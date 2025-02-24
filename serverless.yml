@@ -19,8 +19,8 @@ provider:
       - subnet-def67890
 
 functions:
-  call-actor:
-    handler: dist/functions/callActor.main
+  call-profile-actor:
+    handler: dist/functions/callProfileActor.main
     events:
       - sqs:
           arn:

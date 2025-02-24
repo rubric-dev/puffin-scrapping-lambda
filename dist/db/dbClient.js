@@ -6,6 +6,7 @@ const dotenv = require("dotenv");
 // 로컬 환경에서만 .env 파일 로드
 if (process.env.NODE_ENV !== "production") {
     dotenv.config();
+    console.log("tt");
 }
 const pool = new pg_1.Pool({
     host: process.env.DB_HOST,
