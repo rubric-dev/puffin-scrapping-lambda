@@ -8,32 +8,41 @@ provider:
   environment:
     NODE_ENV: ${self:provider.stage} # 환경 구분
 
-    # ✅ 로컬에서는 .env 사용, AWS에서는 SSM 값 사용
-    DB_HOST: ${env:DB_HOST, ssm:/myapp/${self:provider.stage}/db-host}
-    DB_USER: ${env:DB_USER, ssm:/myapp/${self:provider.stage}/db-user}
-    DB_PASSWORD: ${env:DB_PASSWORD, ssm:/myapp/${self:provider.stage}/db-password}
-    DB_NAME: ${env:DB_NAME, ssm:/myapp/${self:provider.stage}/db-name}
-    APIFY_TOKEN: ${env:APIFY_TOKEN, ssm:/myapp/${self:provider.stage}/apify-token}
+    # ✅ 로컬에서는 .env 사용, AWS에서는 SSM 강제 적용
+    DB_HOST: ${ssm:/puffin-lambda/${self:provider.stage}/db-host, env:DB_HOST}
+    DB_USER: ${ssm:/puffin-lambda/${self:provider.stage}/db-user, env:DB_USER}
+    DB_PASSWORD: ${ssm:/puffin-lambda/${self:provider.stage}/db-password, env:DB_PASSWORD}
+    DB_NAME: ${ssm:/puffin-lambda/${self:provider.stage}/db-name, env:DB_NAME}
+    APIFY_TOKEN: ${ssm:/puffin-lambda/apify-token, env:APIFY_TOKEN}
 
+  # ✅ AWS 배포 시에는 무조건 SSM 값을 사용하도록 변경
   vpc:
     securityGroupIds:
-      - ${env:SECURITY_GROUP_ID, ssm:/myapp/${self:provider.stage}/security-group-id}
+      - ${ssm:/puffin-lambda/${self:provider.stage}/security-group-id, env:SECURITY_GROUP_ID}
     subnetIds:
-      - ${env:SUBNET_ID_1, ssm:/myapp/${self:provider.stage}/subnet-1}
-      - ${env:SUBNET_ID_2, ssm:/myapp/${self:provider.stage}/subnet-2}
+      - ${ssm:/puffin-lambda/${self:provider.stage}/subnet-1, env:SUBNET_ID_1}
+      - ${ssm:/puffin-lambda/${self:provider.stage}/subnet-2, env:SUBNET_ID_2}
 
 functions:
   call-profile-actor:
-    name: call-profile-actor-${self:provider.stage}
+    name: ${self:service}-${self:provider.stage}-call-profile-actor
     handler: dist/functions/callProfileActor.main
 
   call-feed-actor:
-    name: call-feed-actor-${self:provider.stage}
+    name: ${self:service}-${self:provider.stage}-call-feed-actor
     handler: dist/functions/callFeedActor.main
+
+  call-content-actor:
+    name: ${self:service}-${self:provider.stage}-call-content-actor
+    handler: dist/functions/callContentActor.main
 
 plugins:
   - serverless-dotenv-plugin
 
 custom:
   dotenv:
-    path: .env # ✅ 항상 `.env`를 로드하도록 설정
+    path: .env # ✅ 로컬 실행 시 .env를 자동 로드
+
+package:
+  exclude:
+    - .env  # ✅ 배포 패키지에서 .env 파일 제외

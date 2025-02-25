@@ -15,6 +15,7 @@ interface ApifyRunActorResponse {
 
 export const main = async (event: SQSEvent, context: Context) => {
   console.log("[callFeedScrapingActor] SQS 이벤트 수신");
+  console.log("📌 SQS 이벤트 전체 로그:", JSON.stringify(event, null, 2)); // ✅ 전체 이벤트 로그 찍기
 
   // 1️⃣ SQS 메시지에서 타겟 데이터 추출
   const targets: Target[] = event.Records.map((record) => {

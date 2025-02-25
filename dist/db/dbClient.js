@@ -4,7 +4,7 @@ exports.query = void 0;
 const pg_1 = require("pg");
 const dotenv = require("dotenv");
 // 로컬 환경에서만 .env 파일 로드
-if (process.env.NODE_ENV !== "production") {
+if (process.env.NODE_ENV !== "production" && process.env.NODE_ENV !== "dev") {
     dotenv.config();
     console.log("tt");
 }

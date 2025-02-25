@@ -6,7 +6,8 @@ if (process.env.NODE_ENV !== "production") {
   dotenv.config();
 }
 
-const ACTOR_ID = "apify~instagram-profile-scraper";
+const PROFILE_ACTOR_ID = "apify~instagram-profile-scraper";
+const CONTENT_ACTOR_ID = "apify~instagram-profile-scraper";
 const APIFY_BASE_URL = "https://api.apify.com/v2/acts";
 
 export const runActor = async (channelUsernames: string[]) => {
@@ -19,7 +20,7 @@ export const runActor = async (channelUsernames: string[]) => {
 
   try {
     const response = await axios.post(
-      `${APIFY_BASE_URL}/${ACTOR_ID}/runs?token=${process.env.APIFY_TOKEN}`,
+      `${APIFY_BASE_URL}/${PROFILE_ACTOR_ID}/runs?token=${process.env.APIFY_TOKEN}`,
       request,
       {
         headers: { "Content-Type": "application/json" },
