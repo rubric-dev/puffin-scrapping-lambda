@@ -1,43 +1,39 @@
 service: puffin
-  
 
 provider:
   name: aws
   runtime: nodejs18.x
   region: ap-northeast-2
+  stage: ${opt:stage, 'dev'} # 기본값: dev
   environment:
-    DB_HOST: ${env:DB_HOST, ssm:/myapp/db-host}
-    DB_USER: ${env:DB_USER, ssm:/myapp/db-user}
-    DB_PASSWORD: ${env:DB_PASSWORD, ssm:/myapp/db-password}
-    DB_NAME: ${env:DB_NAME, ssm:/myapp/db-name}
-    APIFY_TOKEN: ${env:APIFY_TOKEN, ssm:/myapp/apify-token}
+    NODE_ENV: ${self:provider.stage} # 환경 구분
+
+    # ✅ 로컬에서는 .env 사용, AWS에서는 SSM 값 사용
+    DB_HOST: ${env:DB_HOST, ssm:/myapp/${self:provider.stage}/db-host}
+    DB_USER: ${env:DB_USER, ssm:/myapp/${self:provider.stage}/db-user}
+    DB_PASSWORD: ${env:DB_PASSWORD, ssm:/myapp/${self:provider.stage}/db-password}
+    DB_NAME: ${env:DB_NAME, ssm:/myapp/${self:provider.stage}/db-name}
+    APIFY_TOKEN: ${env:APIFY_TOKEN, ssm:/myapp/${self:provider.stage}/apify-token}
+
   vpc:
     securityGroupIds:
-      - sg-0123456789abcdef  # ✅ RDS에 접근 가능한 SG ID
+      - ${env:SECURITY_GROUP_ID, ssm:/myapp/${self:provider.stage}/security-group-id}
     subnetIds:
-      - subnet-abc12345
-      - subnet-def67890
+      - ${env:SUBNET_ID_1, ssm:/myapp/${self:provider.stage}/subnet-1}
+      - ${env:SUBNET_ID_2, ssm:/myapp/${self:provider.stage}/subnet-2}
 
 functions:
   call-profile-actor:
+    name: call-profile-actor-${self:provider.stage}
     handler: dist/functions/callProfileActor.main
-    events:
-      - sqs:
-          arn:
-            Fn::GetAtt:
-              - ScrapingQueue
-              - Arn
-          batchSize: 10
 
   call-feed-actor:
+    name: call-feed-actor-${self:provider.stage}
     handler: dist/functions/callFeedActor.main
-    events:
-      - sqs:
-          arn:
-            Fn::GetAtt:
-              - ScrapingQueue
-              - Arn
-          batchSize: 10
 
 plugins:
   - serverless-dotenv-plugin
+
+custom:
+  dotenv:
+    path: .env # ✅ 항상 `.env`를 로드하도록 설정
