@@ -29,5 +29,15 @@ functions:
               - Arn
           batchSize: 10
 
+  call-feed-actor:
+    handler: dist/functions/callFeedActor.main
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - ScrapingQueue
+              - Arn
+          batchSize: 10
+
 plugins:
   - serverless-dotenv-plugin

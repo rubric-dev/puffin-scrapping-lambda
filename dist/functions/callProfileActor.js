@@ -29,13 +29,12 @@ const main = async (event, context) => {
         console.log(`[프로필데이터수집][Apify] Actor Run ID: ${actorRunId}, Dataset ID: ${datasetId}`);
         // 3️⃣ PostgreSQL RDS에 저장
         const insertQuery = `
-      INSERT INTO scraping_actor_log (actor_run_id, dataset_id, target_ids, type, created_at)
-      VALUES ($1, $2, $3, $4, NOW())
-    `;
-        const targetIds = targets.map((cc) => cc.id).join(",");
-        await (0, dbClient_1.query)(insertQuery, [actorRunId, datasetId, targetIds, "PROFILE"]);
+        INSERT INTO scraping_actor_log (actor_run_id, dataset_id, target_ids, type, created_at, date, status)
+        VALUES ($1, $2, $3::jsonb, $4, CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Seoul', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Seoul', 'READY')
+        `;
+        const targetIdsArray = targets.map(cc => Number(cc.id)); // ✅ 숫자로 변환
+        await (dbClient_1.query)(insertQuery, [actorRunId, datasetId, JSON.stringify(targetIdsArray), "PROFILE"]);
         console.log("[프로필데이터수집] PostgreSQL 로그 저장 완료");
-        console.log("[callProfileScrapingActor] 종료");
     }
     catch (error) {
         if (error instanceof Error) {
